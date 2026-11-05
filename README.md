@@ -16,9 +16,42 @@ Frontend desenvolvido por `@ogusmello`. [Repositório do frontend](https://githu
 
 ## Como executar
 
-**Pré-requisitos:** JDK 25 e Docker com Compose.
+### Pré-requisitos
 
-O arquivo [`.env.example`](.env.example) documenta as variáveis de ambiente da aplicação. Na raiz do projeto, ajuste os valores abaixo para corresponderem à configuração do PostgreSQL no Docker Compose e execute os comandos no mesmo terminal.
+- **Docker** com Docker Compose.
+- **JDK 25**, caso queira executar a API localmente com o Maven Wrapper.
+
+O arquivo [`.env.example`](.env.example) documenta as variáveis de ambiente necessárias para configurar a aplicação.
+
+### Opção 1 - API e PostgreSQL com Docker Compose
+
+Na raiz do projeto, copie o arquivo `.env.example` para `.env` e configure as variáveis conforme o exemplo abaixo.
+
+```dotenv
+DATABASE_HOST=localhost
+DATABASE_HOST_DOCKER=postgres-db
+DATABASE_PORT=5432
+DATABASE_NAME=name_exemplo
+DATABASE_USERNAME=usuario_exemplo
+DATABASE_PASSWORD=senha_local_de_exemplo
+```
+
+Substitua os valores de exemplo de nome, usuário e senha pelas credenciais que deseja utilizar no PostgreSQL.
+
+Em seguida, execute o comando abaixo.
+
+```bash
+docker compose up -d --build
+```
+
+O Docker Compose construirá a imagem da API a partir do `Dockerfile` e iniciará os dois serviços.
+
+- **PostgreSQL** - banco de dados da aplicação.
+- **API** - aplicação Spring Boot, iniciada após o PostgreSQL passar na verificação de saúde.
+
+### Opção 2 - API local com Maven Wrapper
+
+Para desenvolver ou depurar a aplicação diretamente na IDE, é possível iniciar apenas o PostgreSQL no Docker e executar a API localmente.
 
 **Windows (PowerShell)**
 
@@ -29,7 +62,7 @@ $env:DATABASE_NAME = 'name_exemplo'
 $env:DATABASE_USERNAME = 'usuario_exemplo'
 $env:DATABASE_PASSWORD = 'senha_local_de_exemplo'
 
-docker compose up -d
+docker compose up -d --wait postgres-db
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -42,17 +75,32 @@ export DATABASE_NAME=name_exemplo
 export DATABASE_USERNAME=usuario_exemplo
 export DATABASE_PASSWORD=senha_local_de_exemplo
 
-docker compose up -d
+docker compose up -d --wait postgres-db
 ./mvnw spring-boot:run
 ```
 
-A API ficará disponível em `http://localhost:8080`.
+> **Observação:** os valores configurados no terminal devem corresponder aos definidos no arquivo `.env` utilizado pelo Docker Compose.
 
-- [Swagger UI](http://localhost:8080/swagger-ui/index.html) — explore os contratos e teste as requisições.
-- [OpenAPI](http://localhost:8080/v3/api-docs) — consulte ou importe a especificação no Postman.
+O Maven Wrapper utiliza a versão configurada do Maven, sem exigir uma instalação manual da ferramenta.
 
-Se a aplicação apresentar um erro de conexão na primeira inicialização, confira se o PostgreSQL terminou de iniciar e 
-tente executar o Spring Boot novamente.
+### Acessando a API
+
+Com a aplicação em execução, os seguintes endereços estarão disponíveis.
+
+A API ficará disponível em `http://localhost:8080`
+
+- **Swagger UI** - [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **OpenAPI** - [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+### Encerrando os containers
+
+Para parar e remover os containers da aplicação, execute o comando abaixo.
+
+```bash
+docker compose down
+```
+
+Os dados do PostgreSQL são preservados no volume Docker configurado para o projeto.
 
 ## Endpoints
 
